@@ -2,7 +2,7 @@ use errors::*;
 use std::fs;
 use std::path::PathBuf;
 
-use utils::{write_int_to_file, read_int_from_file, send_notification};
+use utils::{write_int_to_file, read_int_from_file};
 
 
 /// The object in charge of manipulating your laptop's backlight.
@@ -61,12 +61,11 @@ impl Backlight {
         write_int_to_file(path, value)
     }
 
-    fn increment_raw(&mut self, amount: isize) -> Result<()> {
-        let current = self.current_raw()? as isize;
+    pub fn increment(&mut self, amount: isize) -> Result<()> {
+        let current = self.current()? as isize;
         let value = current + amount;
-        let max = self.max()?;
-        if value >= max as isize {
-            self.set(max)
+        if value >= 100 {
+            self.set(100)
         } else if value <= 0 {
             self.set(0)
         } else {

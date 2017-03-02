@@ -1,7 +1,6 @@
 use std::fs::{File, OpenOptions};
 use std::io::{self, Read, Write};
 use std::path::Path;
-use notify_rust::Notification;
 
 use errors::*;
 
@@ -25,7 +24,6 @@ macro_rules! unwrap_or_exit {
 }
 
 pub fn write_int_to_file<P: AsRef<Path>>(path: P, value: usize) -> Result<()> {
-    println!("{}", path.as_ref().display());
     let mut f = OpenOptions::new().write(true)
         .truncate(true)
         .open(path)
@@ -54,13 +52,4 @@ pub fn print_backtrace(e: Error) {
     for e in e.iter().skip(1) {
         writeln!(stderr, "\tcaused by: {}", e).expect("Writing to stderr failed");
     }
-}
-
-/// Send the user a notification, ignoring any failures.
-pub fn send_notification<S: AsRef<str>>(msg: S) {
-    let _ = Notification::new()
-        .summary("Brightness")
-        .body(msg.as_ref())
-        .timeout(5000) //milliseconds
-        .show();
 }
