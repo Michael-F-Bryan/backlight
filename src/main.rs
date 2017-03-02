@@ -1,40 +1,31 @@
 #[macro_use]
 extern crate error_chain;
+extern crate notify_rust;
 extern crate clap;
 
 mod backlight;
+#[macro_use]
+mod utils;
 
 use std::process;
-use std::io::{self, Write};
 
 pub use errors::*;
 pub use backlight::Backlight;
+use utils::{send_notification, print_backtrace};
 
-
-/// Unwraps a result. If there was an error, print the backtrace and then
-/// exit.
-macro_rules! unwrap_or_exit {
-    ($maybe_err:expr) => {
-        unwrap_or_exit!($maybe_err, 1)
-    };
-
-    ($maybe_err:expr, $status_code:expr) => {
-        match $maybe_err {
-            Ok(thing) => thing,
-            Err(e) => {
-                print_backtrace(e);
-                process::exit($status_code);
-            }
-        }
-    };
-}
 
 
 fn main() {
-    let bl = unwrap_or_exit!(Backlight::new());
-    let max = unwrap_or_exit!(bl.max());
+    let mut bl = unwrap_or_exit!(Backlight::new());
+    let current = unwrap_or_exit!(bl.current());
 
-    println!("Max brightness: {:?}", max);
+    unwrap_or_exit!(bl.backlight_on(true));
+
+    println!("Current brightness: {:?}", current);
+    send_notification(format!("Current value: {}%", current));
+
+
+    // unwrap_or_exit!(bl.set_absolute(208));
 }
 
 
@@ -46,19 +37,8 @@ mod errors {
         }
 
         errors {
-            NoBacklightFound {
-                description("No backlight found")
-                display("No backlight found")
-            }
+            NoBacklightFound 
+            InvalidBrightness
         }
-    }
-}
-
-fn print_backtrace(e: Error) {
-    let mut stderr = io::stderr();
-    writeln!(stderr, "error: {}", e);
-
-    for e in e.iter().skip(1) {
-        writeln!(stderr, "caused by: {}", e);
     }
 }

@@ -6,3 +6,4 @@ authors = ["Michael-F-Bryan <michaelfbryan@gmail.com>"]
 [dependencies]
 clap = "*"
 error-chain = "*"
+notify-rust = "*"
